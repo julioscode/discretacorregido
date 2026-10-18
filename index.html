@@ -1,0 +1,191 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Editor de Transformaciones Lineales · ℝ²</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="styles.css">
+</head>
+<body>
+<div class="app">
+
+  <header class="topbar">
+    <div class="brand">
+      <div class="mark"></div>
+      <h1>Editor de Transformaciones Lineales</h1>
+      <span class="rl">ℝ²</span>
+    </div>
+    <div class="status"><span class="dot"></span>listo · sin servidor</div>
+  </header>
+
+  <aside class="panel left">
+
+    <section class="block">
+      <p class="block-title">Cargar vértices</p>
+      <div class="dropzone" id="dropzone">
+        <span>Arrastra un archivo .txt o .csv</span>
+        <span class="hint">formato: x,y por línea · o haz clic para elegir</span>
+        <input type="file" id="file-input" accept=".txt,.csv">
+      </div>
+
+      <table class="vtable" id="vtable">
+        <thead>
+          <tr><th></th><th>x</th><th>y</th><th></th></tr>
+        </thead>
+        <tbody id="vtable-body"></tbody>
+      </table>
+      <button class="add-vertex-btn" id="add-vertex">+ agregar vértice</button>
+    </section>
+
+    <section class="block">
+      <p class="block-title">Transformación</p>
+      <div class="tabs">
+        <button class="tab-btn active" data-tab="rotacion">Rotación</button>
+        <button class="tab-btn" data-tab="homotecia">Homotecia</button>
+        <button class="tab-btn" data-tab="reflexion">Reflexión</button>
+        <button class="tab-btn" data-tab="composicion">Composición</button>
+      </div>
+
+      <div class="tab-panel active" data-panel="rotacion">
+        <div class="field">
+          <label>Sentido</label>
+          <select id="rot-sentido">
+            <option value="antihorario">Antihorario (+)</option>
+            <option value="horario">Horario (−)</option>
+          </select>
+        </div>
+        <div class="field">
+          <label>Ángulo α <span class="slider-value" id="rot-angle-val">90°</span></label>
+          <input type="range" id="rot-angle-slider" min="0" max="360" value="90" step="1">
+          <input type="number" id="rot-angle" value="90" style="margin-top:6px;">
+        </div>
+        <div class="field-row">
+          <div class="field"><label>Centro x</label><input type="number" id="rot-cx" value="0"></div>
+          <div class="field"><label>Centro y</label><input type="number" id="rot-cy" value="0"></div>
+        </div>
+      </div>
+
+      <div class="tab-panel" data-panel="homotecia">
+        <div class="field">
+          <label class="radio-opt" style="margin-bottom:8px;">
+            <input type="checkbox" id="homo-independiente">
+            escalar ejes de forma independiente
+          </label>
+        </div>
+        <div class="field" id="homo-k-field">
+          <label>Factor k <span class="slider-value" id="homo-k-val">2.0</span></label>
+          <input type="range" id="homo-k-slider" min="-3" max="3" value="2" step="0.1">
+          <input type="number" id="homo-k" value="2" step="0.1" style="margin-top:6px;">
+        </div>
+        <div class="field-row" id="homo-kxky-field" style="display:none;">
+          <div class="field"><label>kx</label><input type="number" id="homo-kx" value="2" step="0.1"></div>
+          <div class="field"><label>ky</label><input type="number" id="homo-ky" value="1" step="0.1"></div>
+        </div>
+        <div class="field-row">
+          <div class="field"><label>Centro x</label><input type="number" id="homo-cx" value="0"></div>
+          <div class="field"><label>Centro y</label><input type="number" id="homo-cy" value="0"></div>
+        </div>
+      </div>
+
+      <div class="tab-panel" data-panel="reflexion">
+        <div class="field">
+          <label>Eje / recta de reflexión</label>
+          <div class="radio-group" id="refl-options">
+            <label class="radio-opt selected"><input type="radio" name="refl" value="x" checked> Eje X</label>
+            <label class="radio-opt"><input type="radio" name="refl" value="y"> Eje Y</label>
+            <label class="radio-opt"><input type="radio" name="refl" value="yx"> Recta y = x</label>
+            <label class="radio-opt"><input type="radio" name="refl" value="angulo"> Recta por el origen, ángulo α</label>
+            <label class="radio-opt"><input type="radio" name="refl" value="arbitraria"> Recta arbitraria (α + punto)</label>
+          </div>
+        </div>
+        <div class="field" id="refl-angle-field" style="display:none;">
+          <label>Ángulo α <span class="slider-value" id="refl-angle-val">45°</span></label>
+          <input type="range" id="refl-angle-slider" min="0" max="180" value="45" step="1">
+          <input type="number" id="refl-angle" value="45" style="margin-top:6px;">
+        </div>
+        <div class="field-row" id="refl-point-field" style="display:none;">
+          <div class="field"><label>Punto x</label><input type="number" id="refl-px" value="0"></div>
+          <div class="field"><label>Punto y</label><input type="number" id="refl-py" value="0"></div>
+        </div>
+      </div>
+
+      <div class="tab-panel" data-panel="composicion">
+        <div class="field">
+          <label>Tipo de paso</label>
+          <select id="comp-type">
+            <option value="rotacion">Rotación</option>
+            <option value="homotecia">Homotecia</option>
+            <option value="reflexion">Reflexión</option>
+          </select>
+        </div>
+        <div id="comp-params"></div>
+        <button class="btn btn-secondary" id="comp-add">+ agregar paso a la composición</button>
+
+        <p class="block-title" style="margin-top:14px;">Secuencia (T₁ → Tₙ)</p>
+        <ul class="queue-list" id="comp-queue"></ul>
+      </div>
+    </section>
+
+    <section class="block">
+      <button class="btn btn-primary" id="btn-apply">Aplicar transformación</button>
+      <button class="btn btn-secondary" id="btn-animate">Animar transición</button>
+      <button class="btn btn-secondary" id="btn-undo">↺ Deshacer</button>
+      <button class="btn btn-secondary" id="btn-export">⬇ Exportar figura (PNG)</button>
+      <button class="btn btn-ghost" id="btn-reset">Limpiar / restablecer</button>
+    </section>
+
+  </aside>
+
+  <main class="canvas-wrap">
+    <canvas id="cv"></canvas>
+    <div class="canvas-toolbar">
+      <button class="ctl-btn" id="zoom-in" title="Acercar">+</button>
+      <button class="ctl-btn" id="zoom-out" title="Alejar">−</button>
+      <button class="ctl-btn" id="zoom-fit" title="Encuadrar">⤢</button>
+    </div>
+    <div class="legend">
+      <div class="li"><span class="sw orig"></span>Polígono original</div>
+      <div class="li"><span class="sw tr"></span>Polígono transformado</div>
+    </div>
+    <div class="zoom-readout" id="zoom-readout">100% · 1 u = 40px</div>
+    <div id="toast-wrap"></div>
+  </main>
+
+  <aside class="panel right">
+    <section class="block">
+      <p class="block-title">Matriz asociada A</p>
+      <div id="matrix-panel">
+        <p class="empty-note">Aplica una transformación para ver su matriz asociada.</p>
+      </div>
+    </section>
+
+    <section class="block" id="basis-block" style="display:none;">
+      <p class="block-title">Imágenes de la base canónica</p>
+      <div class="basis-row">
+        <div class="basis-item">
+          <div class="bl">T(e₁)</div>
+          <div class="bv" id="te1">—</div>
+        </div>
+        <div class="basis-item">
+          <div class="bl">T(e₂)</div>
+          <div class="bv" id="te2">—</div>
+        </div>
+      </div>
+    </section>
+
+    <section class="block">
+      <p class="block-title">Coordenadas: entrada → salida</p>
+      <div id="coord-panel">
+        <p class="empty-note">La tabla comparativa de vértices aparecerá aquí.</p>
+      </div>
+    </section>
+  </aside>
+
+</div>
+
+<script src="script.js"></script>
+</body>
+</html>
